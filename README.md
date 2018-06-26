@@ -1,6 +1,22 @@
 Code associated with the paper: 
 Bajgar, O., Kadlec, R., and Kleindienst, J. *A Boo(n) for Evaluating Architecture Performance*. ICML 2018.
 
+## Use Boo<sub>n</sub>!
+You can find a Python implementation of the empirical estimator of Boo<sub>n</sub> in `boon/boon.py`. You can also install
+it using
+
+```bash
+pip install git+https://gitlab.com/obajgar/boon.git
+```
+
+Then, having your validation results in the `valid` array and the corresponding test results in the `test` array, you can calculate Boo<sub>7</sub> using
+```python
+from boon import boo
+boo7 = boo(valid, test, n=7, best='max')
+```
+The `best='max'` indicates that you are using a metric where higher is better (e.g. accuracy). For metrics such as the error rate, set `best='min'`.
+
+
 ## Work in progress
 We are still tidying up some of the code for release. However, we are gradually making it available.
 
