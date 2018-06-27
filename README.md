@@ -6,10 +6,10 @@ You can find a Python implementation of the empirical estimator of Boo<sub>n</su
 it using
 
 ```bash
-pip install git+https://gitlab.com/obajgar/boon.git
+pip install boon
 ```
 
-Then, having your validation results in the `valid` array and the corresponding test results in the `test` array, you can calculate e.g. Boo<sub>5</sub> using
+Then, having your validation results in the `valid` array and the corresponding test results in the `test` array, you can calculate e.g. Boo<sub>5</sub> (default) using
 ```python
 from boon import boo
 boo5 = boo(valid, test, n=5, best='max')
