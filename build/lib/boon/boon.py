@@ -21,14 +21,16 @@ def boo(valid, test=None, n=5, best='max'):
     :param best: ('max' or 'min') Indicates whether 'best' corresponds to the maximum or minimum for the validation results.
     :return: (float) Boo_n
     """
+
+    valid_array = np.array(valid)
+    m = len(valid_array)
+
     if test is None:
         test = valid
-    elif len(valid) != len(test):
+    elif len(test) != m:
         raise ValueError("The number of validation and test results must be the same.")
 
-    m = len(valid)
     order_coeff = {'max': 1, 'min': -1}[best]
-    valid_array = np.array(valid)
 
     # A bit of numpy magic to handle ties in validation results:
     # np.unique returns sorted unique validation results with their counts and an inverse array,
