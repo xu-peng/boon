@@ -4,7 +4,7 @@
 
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage[draft]{hyperref}       % hyperlinks
+\usepackage{hyperref}       % hyperlinks
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -26,6 +26,8 @@
 \usepackage{appendix}
 \usepackage{subcaption}
 %\usepackage{subfigure}
+%\usepackage{listings}
+
 
 \newcommand{\attnIn}{m}
 \newcommand{\attnU}{u}
@@ -141,7 +143,7 @@
 
 \icmlaffiliation{ibm}{~ ~IBM Watson, Prague AI Research \& Development Lab.\\  RK has since moved to Deepmind}
 
-\icmlcorrespondingauthor{Ondrej Bajgar}{~ OBajgar@cz.ibm.com~ }
+\icmlcorrespondingauthor{Ondrej Bajgar}{~ ondrej@bajgar.org~ }
 %\icmlcorrespondingauthor{Jan Kleindienst}{jankle@cz.ibm.com}
 
 \icmlkeywords{Evaluation methodology, machine learning, deep learning, Statistics, ICML}
@@ -320,16 +322,17 @@ In practice, the best model is usually chosen with respect to the validation per
 $$E_{tv} \left(\xval\right) := \mathds{E}\left[ X_\text{test} | X_\text{val} = \xval\right] $$
 yielding an expression for the expected test performance of the best-validation model chosen from a pool of size $n$
 \begin{multline}
-$$\boon(\mathfrak{P}) = \int E_{tv}(\xval) d\mathfrak{P}_{\text{val}}(\xval) = \\ 
+$$\boon(\mathfrak{P}) = \int E_{tv}(\xval) d\mathfrak{P}_{\text{val}}^\text{best}(\xval) = \\ 
 \int_{-\infty}^\infty E_{tv}(\xval) n f_\text{val}(\xval)F_\text{val}^{n-1}(\xval) d\xval
 \end{multline}
-where $\mathfrak{P}_\text{val}$ is the marginal probability distribution of the validation performance. Similar simple substitution can be done in the discrete case.
+where $\mathfrak{P}_\text{val}^\text{best}$ is the marginal probability distribution of the best-out-of-$n$ validation performance. Similar simple substitution can be done in the discrete case.
 
 Expanding the expression for the bivariate Gaussian distribution with marginal test performance with mean $\mu_\text{test}$, standard deviation $\sigma_\text{test}$, and test-validation correlation $\rho$ as in Appendix~\ref{app:gaussianTV} yields a convenient expression \begin{equation}
 \label{eq:gaussExpMax}
 \boon= \mu_\text{test}+ \rho\;\sigma_\text{test}\;\overline\emn\left(\mathcal{N}(0,1)\right) \;,
 \end{equation}
 which can again be used for parametric estimation. 
+
 
 
 \subsection{Empirical estimation}
@@ -358,7 +361,8 @@ We approximate \tboon of the true performance distribution by \tboon of this emp
 %Another possible estimator is
 
 This is in fact a weighted average of the test results. In case of a tie in validation results, i.e. if $x_{i_{j+1}}^\text{valid} = x_{i_{j+2}}^\text{valid} = ... = x_{i_{j+k}}^\text{valid}$, one should assign an equal weight of $\left(\left(\frac{j+1}{m}\right)^n-\left(\frac{j}{m}\right)^n + \dots + \left(\frac{j+k}{m}\right)^n-\left(\frac{j+k-1}{m}\right)^n \right)/k = 
-\left(\left(\frac{j+k}{m}\right)^n-\left(\frac{j}{m}\right)^n\right)/k$ to the corresponding test samples.
+\left(\left(\frac{j+k}{m}\right)^n-\left(\frac{j}{m}\right)^n\right)/k$ to the corresponding test samples\footnote{You can get an optimized Python implementation of the non-parametric estimator via \;\texttt{pip install boon}.}.
+
 
 This estimator does not make any assumption about the performance distribution from which our observations are drawn. If we do use such an assumption (e.g. we know that the performance distribution of our architecture usually belongs to a certain family, e.g. Gaussian), we can add information to our estimator and possibly get an even better estimate (i.e. one with lower sampling error). For the Gaussian distribution, we can use the standard estimators of the parameters in Equation~\ref{eq:gaussExpMax} to get a parametric estimator
 $$\widehat{\mu_\text{test}} + \widehat{\rho}\;\widehat{\sigma_\text{test}}\; \overline\emn\left(\mathcal{N}(0,1)\right)$$
@@ -382,7 +386,7 @@ In our experiments, we decided to use $n=5$ -- the AS Reader model which we use 
 % By the above normalization, we have eliminated the dependence of the performance metric on the number of experiments, which was one of the main problems of reporting the performance of the best single model. A second important problem was a lack of statistical robustness -- the fact that the reported result was just a single number drawn from some random distribution and hence subject to random noise, if used to characterize such distribution. With \tboon, we can reduce the impact of noise as needed, as far as we can increase the number of experiments run. 
 
 
-% \subsection{Expected maximum of Gaussian random variables}\todo{Tahle subsekce asi jde celá do kytek}
+% \subsection{Expected maximum of Gaussian random variables}\todo{Tahle subsekce asi jde do kytek}
 
 % Extreme value theory yields the following estimate of the maximum of $n$ \iid{} Gaussian random variables with mean $\mu$ and variance $\sigma^2$:
 % $$\emn \approx \mu + \sigma\left((1-\gamma)\Phi^{-1}\left(1-\frac{1}{n}\right)+\gamma\Phi^{-1}\left(1-\frac{1}{en}\right)\right)$$
@@ -575,6 +579,18 @@ Still, asking for the performance of a best model out of $n$ can have valid reas
 
 
 
+\bibliographystyle{icml2018}
+\bibliography{references}
+
+
+% \section*{Other Appendices}
+% \hypertarget{app:metastudy-details}{}
+% \hypertarget{app:conf-ints}{}
+
+
+% {\it The article with all appendices can be found as a supplement to the ICML submission, in the Gitlab repository (\url{https://gitlab.com/obajgar/boon}), or on arXiv.}
+% \end{appendices}
+
 \begin{appendices}
 
 
@@ -616,18 +632,6 @@ Using the same two tricks as above, this can be simplified to
 where $\overline\emn\left(\mathcal{N}(0,1)\right) $ is the single-evaluation expected maximum of the standard normal distribution as defined above. 
 
 
-\bibliographystyle{icml2018}
-\bibliography{references}
-
-
-% \section*{Other Appendices}
-% \hypertarget{app:metastudy-details}{}
-% \hypertarget{app:conf-ints}{}
-
-
-% {\it The article with all appendices can be found as a supplement to the ICML submission, in the Gitlab repository (\url{https://gitlab.com/obajgar/boon}), or on arXiv.}
-% \end{appendices}
-
 
 \section{Survey of ICLR 2017 Papers: Method}
 \label{app:metastudy-details}
@@ -643,7 +647,7 @@ We then searched for the string "confidence interval", which was matched in only
 \section{Experiments: Details}
 \label{app:experiments}
 
-{\it Note: The data and code for their analysis will be available at \url{http://gitlab.com/obajgar/boon}.}
+{\it Note: The data and code for their analysis are available at \url{http://gitlab.com/obajgar/boon}.}
 
 Here we provide further details of our experiments quantifying the extent of result stochasticity and the resulting effects. 
 
@@ -653,19 +657,19 @@ To run our experiments we have chosen Open Source implementations\footnote{The s
 
 
 \subsection{Data collection}
-To collect the data for our experiments, we repeatedly trained the two models. Each training instance had a different random parameter initialization and random data shuffling. We evaluated the model on the validation and test datasets at least once per epoch. We then took the validation and test performance at the best-validation epoch as a data point for our further analyses.
+To collect the data for our experiments, we repeatedly trained the two models. Each training instance had a different random parameter initialization and random data shuffling. We saved the model at least once per epoch and we then included the validation and test result from the best-validation evaluation as a single data point in our meta-dataset. 
 
 All training was done on Ubuntu 14.04 on a single GPU per training, either Nvidia Tesla K80 or GTX 1080.
 
 \subsubsection{Resnet}
-Resnet was trained with a single set of hyperparameters, the default ones for the above Open Source implementation. That means 5 residual units resulting in a 32-layer Resnet. The model was trained using the 0.9 momentum optimizer, with batch size 128, initial learning rate of 0.1 lowered to 0.01 after 40,000 steps and to 0.001 after 60,000 steps. Data augmentation included padding to 36x36 and then random cropping, horizontal flipping and per-image whitening. L2 regularization weight was set 0.002. 
+Resnet was trained with a single set of hyperparameters, the default ones for the above Open Source implementation. That means 5 residual units resulting in a 32-layer Resnet. The model was trained using the 0.9 momentum optimizer, with batch size 128, initial learning rate of 0.1 lowered to 0.01 after 40,000 steps and to 0.001 after 60,000 steps. Data augmentation included padding to 36x36 and then random cropping, horizontal flipping and per-image whitening. L2 regularization weight was set 0.002. The training ran for 300 epochs.
 
 Training was done using Tensorflow 1.3.
 
 \subsection{AS Reader}
 The AS Reader was trained in two different settings. Firstly 370 times with hyper-parameters fixed to embedding dimension of 128 and 384 hidden dimensions in the GRU units, with all other hyper-parameters as used in the original AS Reader paper \citep{Kadlec2016}.
 
-In the second setting, the hyper-parameters for each training instance were chosen randomly from the following ranges: The batch size was chosen from the range $[16,128]$, and the embedding size and hidden state size were each chosen from the range $[16,512]$ with the $\log_2$ value of the parameter being distributed uniformly in the interval. Parameters from these ranges worked reasonably well in our preliminary experiments.
+In the second setting, the hyper-parameters for each training instance were chosen randomly from the following ranges: The batch size was chosen from the range $[16,128]$, and the embedding size and hidden state size were each chosen from the range $[16,512]$ with the $\log_2$ value of the parameter being distributed uniformly in the interval. Parameters from these ranges worked reasonably well in our preliminary experiments. 
 
 Training was done using Theano 0.9.0 and Blocks 0.2.0.
 
@@ -771,7 +775,7 @@ The results show that when there is suitable correlation between validation and 
 \section{Dealing with Estimator Uncertainty}
 
 \subsection{Confidence intervals}
-\label{}
+\label{app:conf-ints}
 If an estimator characterizing a performance distribution, say  $\widehat{\emn}$ or average, is calculated from experimental observations, it is subject to random variation, so if another research team tries to reproduce the experiments, they generally get a different estimate. The more observations are collected, the more precise the estimate generally is. Confidence intervals provide a natural way to express this uncertainty. Their usage also gives a sense whether the number of performed experiments was sufficient to reduce the uncertainly to a reasonable level, which is again not frequently addressed in \ml papers. 
 
 The construction of the confidence interval would be trivial if we knew the distribution from which our estimate was drawn (as opposed to the distribution of the performance!) -- it is simply the interval between the appropriate quantiles, e.g. the 2.5th and 97.5th quantiles in the case of the $95\%$ confidence interval. Such distribution has been studied extensively for instance in the case of a mean of Gaussian random variables. However, in other cases, it is not known. If we know at least the distribution from which the individual observations were drawn, we can use Monte Carlo methods to precisely estimate the confidence interval; however, if we are not able to make an assumption about the underlying distribution, we need to use only what we have: our samples from the distribution. In such case the variability of our estimator can be approximated using the Bootstrap~\citep{efron79} or similar methods. 
